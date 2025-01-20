@@ -1,0 +1,63 @@
+---
+- name: Display the IP being pinged
+  debug:
+    msg: "Pinging the EC2 instance at IP: {{ ansible_host }}"
+
+- name: Test connectivity to EC2 instance
+  ping:
+    data: "Ping test from Ansible to {{ ansible_host }}"
+
+- name: Update and upgrade APT packages
+  apt:
+    update_cache: yes
+    upgrade: dist
+    cache_valid_time: 3600
+
+- name: Install required dependencies
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker APT repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    state: present
+
+- name: Update APT cache after adding Docker repository
+  apt:
+    update_cache: yes
+
+- name: Install Docker
+  apt:
+    name: docker-ce
+    state: present
+
+- name: Add user to Docker group
+  user:
+    name: ubuntu
+    groups: docker
+    append: yes
+
+- name: Enable and start Docker service
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+
+- name: Create sgp directory in home directory on EC2
+  file:
+    path: /home/ubuntu/sgp
+    state: directory
+    mode: '0755'
+
+
+

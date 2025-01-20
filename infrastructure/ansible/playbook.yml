@@ -1,0 +1,6 @@
+---
+- name: Test connectivity to EC2 instance
+  hosts: sgp
+  become: true
+  roles:
+    - test_ec2
